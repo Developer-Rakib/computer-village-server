@@ -75,6 +75,13 @@ async function run() {
             res.send(result)
         })
 
+        // get all orders
+        app.get('/orders', verifyJwt, async (req, res)=>{
+            const quary = {};
+            const result = await orderCollection.find(quary).toArray()
+            res.send(result)
+        })
+
 
     } finally {
 
