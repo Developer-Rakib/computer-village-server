@@ -58,7 +58,7 @@ async function run() {
         app.put('/profile/:email', verifyJwt, async (req, res) => {
             const userProfile = req.body;
             const email = req.params.email;
-            console.log(userProfile, email);
+            // console.log(userProfile, email);
             const filter = { email: email }
             const options = { upsert: true };
             const updatedDoc = {
@@ -90,6 +90,29 @@ async function run() {
             res.send(result)
         })
 
+        // post part 
+        app.post('/part', verifyJwt, async (req, res) => {
+            const part = req.body;
+            const result = await partsCollection.insertOne(part)
+            if (result.insertedId) {
+                res.send({success: true, message:`Successfuly Added ${part.name}`})
+            }
+            else{
+                res.send({success: false, message:`Somthing is Wrong`})
+            }
+
+        })
+
+        // delete parts
+        app.delete('/part/:id', verifyJwt, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await partsCollection.deleteOne(filter);
+            res.send(result)
+        })
+
+        
+
         // post orders 
         app.post('/orders', async (req, res) => {
             const orderInfo = req.body;
@@ -115,8 +138,8 @@ async function run() {
         // delete order
         app.delete('/order/:id', verifyJwt, async (req, res) => {
             const id = req.params.id;
-            const fiter = { _id: ObjectId(id) };
-            const result = await orderCollection.deleteOne(fiter);
+            const filter = { _id: ObjectId(id) };
+            const result = await orderCollection.deleteOne(filter);
             res.send(result)
         })
 
@@ -130,7 +153,7 @@ async function run() {
         // post reviews 
         app.post('/reviews', verifyJwt, async (req, res) => {
             const review = req.body;
-            console.log(review);
+            // console.log(review);
             const result = await reviewCllection.insertOne(review)
             res.send(result)
         })
