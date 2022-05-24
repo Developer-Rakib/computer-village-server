@@ -36,12 +36,13 @@ async function run() {
         const UserCollection = client.db("ComputerVillage").collection("user");
         const partsCollection = client.db("ComputerVillage").collection("parts");
         const orderCollection = client.db("ComputerVillage").collection("orders");
+        const ReviewCllection = client.db("ComputerVillage").collection("reviews");
 
-
+        // create user
         app.put('/user/:email', async (req, res) => {
             const user = req.body;
             const email = req.params.email;
-            console.log(user, email);
+            // console.log(user, email);
             const filte = { email: email }
             const options = { upsert: true };
             const updatedDoc = {
@@ -79,6 +80,29 @@ async function run() {
         app.get('/orders', verifyJwt, async (req, res)=>{
             const quary = {};
             const result = await orderCollection.find(quary).toArray()
+            res.send(result)
+        })
+
+        // get my order
+         app.get('/orders/:email', verifyJwt,  async (req, res)=>{
+             const email = req.params.email;
+            const fiter = {customerEmail:email};
+            const result = await orderCollection.find(fiter).toArray()
+            res.send(result)
+        })
+
+        // delete order
+         app.delete('/order/:id', verifyJwt,  async (req, res)=>{
+             const id = req.params.id;
+            const fiter = {_id : ObjectId(id)};
+            const result = await orderCollection.deleteOne(fiter);
+            res.send(result)
+        })
+
+        // get all review 
+        app.get('/reviews', async (req, res)=>{
+            const quary = {};
+            const result = await ReviewCllection.find(quary).toArray()
             res.send(result)
         })
 
