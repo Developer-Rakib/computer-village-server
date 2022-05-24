@@ -36,7 +36,7 @@ async function run() {
         const UserCollection = client.db("ComputerVillage").collection("user");
         const partsCollection = client.db("ComputerVillage").collection("parts");
         const orderCollection = client.db("ComputerVillage").collection("orders");
-        const ReviewCllection = client.db("ComputerVillage").collection("reviews");
+        const reviewCllection = client.db("ComputerVillage").collection("reviews");
 
         // create user
         app.put('/user/:email', async (req, res) => {
@@ -48,7 +48,6 @@ async function run() {
             const updatedDoc = {
                 $set: user
             }
-
             const result = await UserCollection.updateOne(filte, updatedDoc, options);
             const token = jwt.sign({ email: email }, process.env.SECRET_KEY, { expiresIn: '60d' });
             res.send({ result, token })
@@ -102,7 +101,15 @@ async function run() {
         // get all review 
         app.get('/reviews', async (req, res)=>{
             const quary = {};
-            const result = await ReviewCllection.find(quary).toArray()
+            const result = await reviewCllection.find(quary).toArray()
+            res.send(result)
+        })
+
+        // post reviews 
+        app.post('/reviews',verifyJwt, async (req, res)=>{
+            const review = req.body;
+            console.log(review);
+            const result = await reviewCllection.insertOne(review)
             res.send(result)
         })
 
