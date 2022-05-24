@@ -39,11 +39,21 @@ async function run() {
         const orderCollection = client.db("ComputerVillage").collection("orders");
         const reviewCllection = client.db("ComputerVillage").collection("reviews");
 
+        async function verfyAdmin  (req, res, next) {
+            const requisterEmail = req.decoded.email;
+            const requister = await UserCollection.findOne({email: requisterEmail})
+            if (requister.roll === "admin") {
+                next()
+            }
+            else{
+                res.status(403).send({ message: 'forbidden' })
+            }
+        }
+
         // create user
         app.put('/user/:email', async (req, res) => {
             const user = req.body;
             const email = req.params.email;
-            // console.log(user, email);
             const filte = { email: email }
             const options = { upsert: true };
             const updatedDoc = {
@@ -53,6 +63,36 @@ async function run() {
             const token = jwt.sign({ email: email }, process.env.SECRET_KEY, { expiresIn: '60d' });
             res.send({ result, token })
         })
+
+        // get all users
+        app.get('/users', verifyJwt, async (req, res) => {
+            const query = {};
+            const result = await UserCollection.find(query).toArray();
+            res.send(result)
+        })
+
+        //   // get admin
+        //   app.get("/admin/:email", verifyToken, async (req, res) => {
+        //     const email = req.params.email;
+        //     const query = { email: email }
+        //     const user = await userCollection.findOne(query);
+        //     // console.log(user);
+        //     const isAdmin = user?.roll === 'admin'
+        //     res.send({ admin: isAdmin })
+        // })
+
+        // make admin
+        app.put("/user/admin/:email", verifyJwt, verfyAdmin,async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: { roll: 'admin' }
+            };
+            const result = await UserCollection.updateOne(filter, updateDoc);
+            res.send(result)
+        })
+
+
 
         // update profile
         app.put('/profile/:email', verifyJwt, async (req, res) => {
